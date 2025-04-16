@@ -2,8 +2,8 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>FC2 正文转简体并下载</title>
-  <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.4/dist/browser.min.js"></script>
+  <title>FC2 网页 → 简体 TXT 下载</title>
+  <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.4/lib/index.min.js"></script>
 </head>
 <body>
   <h2>📘 FC2 网页 → 简体 TXT 下载器</h2>
@@ -24,6 +24,7 @@
         const response = await fetch(proxyUrl);
         const text = await response.text();
 
+        // 初始化 OpenCC 转换器（tw → cn）
         const converter = await OpenCC.Converter({ from: 'tw', to: 'cn' });
         const simplified = await converter(text);
 
