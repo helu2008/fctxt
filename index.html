@@ -2,17 +2,15 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>FC2 网页 → 简体 TXT 下载</title>
-  <!-- 正确的 OpenCC-js 版本路径 -->
-  <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.4/dist/umd/bundle.js"></script>
+  <title>FC2 正文下载为 TXT</title>
 </head>
 <body>
-  <h2>📘 FC2 网页 → 简体 TXT 下载器</h2>
+  <h2>📘 FC2 网页 → 原始正文 TXT 下载器</h2>
   <input type="text" id="urlInput" placeholder="输入 FC2 网页地址" style="width: 400px;">
-  <button onclick="downloadSimplifiedTxt()">下载简体 TXT</button>
+  <button onclick="downloadTxt()">下载原始 TXT</button>
 
   <script>
-    async function downloadSimplifiedTxt() {
+    async function downloadTxt() {
       const url = document.getElementById("urlInput").value.trim();
       if (!url) {
         alert("请输入 FC2 网页链接");
@@ -25,14 +23,10 @@
         const response = await fetch(proxyUrl);
         const text = await response.text();
 
-        // 用 window.OpenCC 调用
-        const converter = await window.OpenCC.Converter({ from: 'tw', to: 'cn' });
-        const simplified = await converter(text);
-
-        const blob = new Blob([simplified], { type: "text/plain;charset=utf-8" });
+        const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = "fc2_simplified.txt";
+        a.download = "fc2_original.txt";
         a.click();
       } catch (error) {
         alert("抓取失败：" + error);
