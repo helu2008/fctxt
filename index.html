@@ -21,16 +21,21 @@
 
     try {
       const response = await fetch(proxyUrl);
-      let text = await response.text();
+      let html = await response.text();
 
-      // ✅ 1. Remove HTML tags
-      text = text.replace(/<[^>]+>/g, "");
+      // ✅ 1. Replace common block-level tags with newline
+      html = html
+        .replace(/<\/?(br|p|div|li|ul|ol|h[1-6]|section|article)[^>]*>/gi, '\n')
+        .replace(/<\/?[^>]+>/g, ''); // Strip remaining tags
 
-      // ✅ 2. Decode HTML entities (like &#12354;, &nbsp;)
-      const decoded = decodeHtmlEntities(text);
+      // ✅ 2. Decode HTML entities
+      const decoded = decodeHtmlEntities(html);
 
-      // ✅ Download as txt
-      const blob = new Blob([decoded], { type: "text/plain;charset=utf-8" });
+      // ✅ 3. Normalize multiple line breaks
+      const cleaned = decoded.replace(/\n{2,}/g, '\n').trim();
+
+      // ✅ 4. Download as txt
+      const blob = new Blob([cleaned], { type: "text/plain;charset=utf-8" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
       a.download = "fc2_cleaned.txt";
@@ -41,7 +46,6 @@
     }
   }
 
-  // Helper to decode HTML entities using browser's own engine
   function decodeHtmlEntities(str) {
     const textarea = document.createElement("textarea");
     textarea.innerHTML = str;
