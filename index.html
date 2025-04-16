@@ -2,12 +2,12 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>FC2 正文下载为 TXT</title>
+  <title>FC2 网页 → TXT 下载器</title>
 </head>
 <body>
-  <h2>📘 FC2 网页 → 原始正文 TXT 下载器</h2>
+  <h2>📘 FC2 网页 → 下载原始正文 TXT</h2>
   <input type="text" id="urlInput" placeholder="输入 FC2 网页地址" style="width: 400px;">
-  <button onclick="downloadTxt()">下载原始 TXT</button>
+  <button onclick="downloadTxt()">下载 TXT</button>
 
   <script>
     async function downloadTxt() {
@@ -29,7 +29,7 @@
         a.download = "fc2_original.txt";
         a.click();
       } catch (error) {
-        alert("抓取失败：" + error);
+        alert("抓取失败：" + error.message);
         console.error(error);
       }
     }
