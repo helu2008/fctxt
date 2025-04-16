@@ -9,11 +9,17 @@
   <input type="text" id="urlInput" placeholder="输入 FC2 网页地址" style="width: 400px;">
   <button onclick="downloadTxt()">下载 TXT</button>
 
-<script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.4/dist/umd/bundle.js"></script>
-<script>
-  window.OpenCC = window.opencc; // 👈 这一步非常关键
+<script type="importmap">
+{
+  "imports": {
+    "opencc": "https://cdn.jsdelivr.net/npm/opencc-js@1.0.4/es/Converter.js"
+  }
+}
 </script>
-<script>
+
+<script type="module">
+  import { Converter } from "opencc";
+
   async function downloadTxt() {
     const url = document.getElementById("urlInput").value.trim();
     if (!url) {
@@ -27,22 +33,21 @@
       const response = await fetch(proxyUrl);
       let html = await response.text();
 
-      // ✅ 1. Replace common block-level tags with newlines
+      // Replace block-level tags with newlines
       html = html
         .replace(/<\/?(br|p|div|li|ul|ol|h[1-6]|section|article)[^>]*>/gi, '\n')
-        .replace(/<\/?[^>]+>/g, ''); // Strip remaining tags
+        .replace(/<\/?[^>]+>/g, '');
 
-      // ✅ 2. Decode HTML entities
+      // Decode HTML entities
       let decoded = decodeHtmlEntities(html);
 
-      // ✅ 3. Convert from Traditional → Simplified Chinese using OpenCC
-      const converter = await window.OpenCC.Converter({ from: 'tw', to: 'cn' });
+      // Convert Traditional → Simplified
+      const converter = await Converter({ from: 'tw', to: 'cn' });
       const simplified = await converter(decoded);
 
-      // ✅ 4. Normalize line breaks
       const cleaned = simplified.replace(/\n{2,}/g, '\n').trim();
 
-      // ✅ 5. Create and trigger TXT download
+      // Download as txt
       const blob = new Blob([cleaned], { type: "text/plain;charset=utf-8" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
@@ -59,6 +64,9 @@
     textarea.innerHTML = str;
     return textarea.value;
   }
+
+  // Attach to global so the button still works
+  window.downloadTxt = downloadTxt;
 </script>
 </body>
 </html>
