@@ -9,16 +9,8 @@
   <input type="text" id="urlInput" placeholder="输入 FC2 网页地址" style="width: 400px;">
   <button onclick="downloadTxt()">下载 TXT</button>
 
-<script type="importmap">
-{
-  "imports": {
-    "opencc": "https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.min.js"
-  }
-}
-</script>
-
 <script type="module">
-  import { Converter } from "opencc";
+  import * as OpenCC from 'https://cdn.jsdelivr.net/npm/opencc-js@1.0.4/dist/esm/t2cn.js';
 
   async function downloadTxt() {
     const url = document.getElementById("urlInput").value.trim();
@@ -42,7 +34,7 @@
       let decoded = decodeHtmlEntities(html);
 
       // Convert Traditional → Simplified
-      const converter = await Converter({ from: 'tw', to: 'cn' });
+      const converter = await OpenCC.Converter({ from: 'tw', to: 'cn' });
       const simplified = await converter(decoded);
 
       const cleaned = simplified.replace(/\n{2,}/g, '\n').trim();
