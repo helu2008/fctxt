@@ -9,30 +9,44 @@
   <input type="text" id="urlInput" placeholder="输入 FC2 网页地址" style="width: 400px;">
   <button onclick="downloadTxt()">下载 TXT</button>
 
-  <script>
-    async function downloadTxt() {
-      const url = document.getElementById("urlInput").value.trim();
-      if (!url) {
-        alert("请输入 FC2 网页链接");
-        return;
-      }
-
-      const proxyUrl = `https://icy-dust-ce73.hengweilu0104.workers.dev/?url=${encodeURIComponent(url)}`;
-
-      try {
-        const response = await fetch(proxyUrl);
-        const text = await response.text();
-
-        const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = "fc2_original.txt";
-        a.click();
-      } catch (error) {
-        alert("抓取失败：" + error.message);
-        console.error(error);
-      }
+<script>
+  async function downloadTxt() {
+    const url = document.getElementById("urlInput").value.trim();
+    if (!url) {
+      alert("请输入 FC2 网页链接");
+      return;
     }
-  </script>
+
+    const proxyUrl = `https://icy-dust-ce73.hengweilu0104.workers.dev/?url=${encodeURIComponent(url)}`;
+
+    try {
+      const response = await fetch(proxyUrl);
+      let text = await response.text();
+
+      // ✅ 1. Remove HTML tags
+      text = text.replace(/<[^>]+>/g, "");
+
+      // ✅ 2. Decode HTML entities (like &#12354;, &nbsp;)
+      const decoded = decodeHtmlEntities(text);
+
+      // ✅ Download as txt
+      const blob = new Blob([decoded], { type: "text/plain;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "fc2_cleaned.txt";
+      a.click();
+    } catch (error) {
+      alert("抓取失败：" + error.message);
+      console.error(error);
+    }
+  }
+
+  // Helper to decode HTML entities using browser's own engine
+  function decodeHtmlEntities(str) {
+    const textarea = document.createElement("textarea");
+    textarea.innerHTML = str;
+    return textarea.value;
+  }
+</script>
 </body>
 </html>
