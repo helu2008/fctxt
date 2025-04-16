@@ -10,7 +10,9 @@
   <button onclick="downloadTxt()">下载 TXT</button>
 
 <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.4/dist/umd/bundle.js"></script>
-
+<script>
+  window.OpenCC = window.opencc; // 👈 这一步非常关键
+</script>
 <script>
   async function downloadTxt() {
     const url = document.getElementById("urlInput").value.trim();
