@@ -2,12 +2,12 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>FC2 网页 → TXT 下载器</title>
+  <title>fc2 to txt</title>
 </head>
 <body>
-  <h2>📘 FC2 网页 → 下载原始正文 TXT</h2>
-  <input type="text" id="urlInput" placeholder="输入 FC2 网页地址" style="width: 400px;">
-  <button onclick="downloadTxt()">下载 TXT</button>
+  <h2>📘 FC2 TO TXT</h2>
+  <input type="text" id="urlInput" placeholder="FC2 webpage" style="width: 400px;">
+  <button onclick="downloadTxt()">Download TXT</button>
 
 <script type="module">
   import * as OpenCC from 'https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/esm/t2cn.js';
@@ -15,7 +15,7 @@
   async function downloadTxt() {
     const url = document.getElementById("urlInput").value.trim();
     if (!url) {
-      alert("请输入 FC2 网页链接");
+      alert("input FC2 webpage");
       return;
     }
 
@@ -46,7 +46,7 @@
       a.download = "fc2_simplified.txt";
       a.click();
     } catch (error) {
-      alert("抓取失败：" + error.message);
+      alert("error：" + error.message);
       console.error(error);
     }
   }
