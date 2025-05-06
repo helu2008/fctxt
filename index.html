@@ -30,6 +30,10 @@ async function downloadTxt() {
                .replace(/<\/?(br|p|div|li|ul|ol|h[1-6]|section|article)[^>]*>/gi, '\n')
                .replace(/<\/?[^>]+>/g, '')
                .replace(/\u00A0/g, ' ')
+               .replace(/&#160;/g, ' ')
+               .replace(/\uFEFF/g, '')
+               .replace(/&nbsp;/gi, ' ')
+               .replace(/&rsquo;/gi, "'")
                .replace(/function\s+[^(]*\([^)]*\)\s*{[\s\S]*?}/gi, '')
                .replace(/var\s+\w+\s*=\s*[^;]+;/gi, '')
                .replace(/window\.[^\n]+/gi, '')
@@ -43,7 +47,7 @@ async function downloadTxt() {
       let cleanLine = line.trim();
 
       if (!ended) {
-        if (/全文完|全书完|全書完|完结|完結/i.test(cleanLine)) {
+        if (/^(全文完|全书完|全書完|完结|完結|已完成)[\s!！。…]*$/i.test(cleanLine)) {
           result.push(cleanLine);
           ended = true;
           continue;
@@ -78,12 +82,6 @@ async function downloadTxt() {
     alert("Error: " + error.message);
     console.error(error);
   }
-}
-
-function decodeHtmlEntities(str) {
-  const textarea = document.createElement("textarea");
-  textarea.innerHTML = str;
-  return textarea.value;
 }
 
 window.downloadTxt = downloadTxt;
