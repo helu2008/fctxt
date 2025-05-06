@@ -1,79 +1,74 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>FC2 to TXT</title>
+  <title>Webpage to TXT</title>
 </head>
 <body>
-  <h2>📘 FC2 TO TXT (Ultimate Clean Version)</h2>
-  <input type="text" id="urlInput" placeholder="输入 FC2 网页地址" style="width: 400px;">
-  <button onclick="downloadTxt()">下载 TXT</button>
+  <h2>📘 Webpage to TXT</h2>
+  <input type="text" id="urlInput" placeholder="Enter webpage URL" style="width: 400px;">
+  <button onclick="downloadTxt()">Download TXT</button>
 
 <script type="module">
-  import * as OpenCC from 'https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/esm/t2cn.js';
+import * as OpenCC from 'https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/esm/t2cn.js';
 
-  async function downloadTxt() {
-    const url = document.getElementById("urlInput").value.trim();
-    if (!url) {
-      alert("请输入 FC2 页面网址");
-      return;
-    }
-
-    const proxyUrl = `https://icy-dust-ce73.hengweilu0104.workers.dev/?url=${encodeURIComponent(url)}`;
-
-    try {
-      const response = await fetch(proxyUrl);
-      let html = await response.text();
-
-      html = html.replace(/<script[\s\S]*?<\/script>/gi, '')
-                 .replace(/<style[\s\S]*?<\/style>/gi, '');
-
-      html = html.replace(/<\/?(br|p|div|li|ul|ol|h[1-6]|section|article)[^>]*>/gi, '\n');
-
-      html = html.replace(/<\/?[^>]+>/g, '');
-
-      html = html.replace(/\u00A0/g, ' ');
-
-      html = html.replace(/function\s+[^(]*\([^)]*\)\s*{[\s\S]*?}/gi, '')
-                 .replace(/var\s+\w+\s*=\s*[^;]+;/gi, '')
-                 .replace(/window\.[^\n]+/gi, '')
-                 .replace(/document\.[^\n]+/gi, '');
-
-      html = html.split('\n').filter(line => {
-        const cleanLine = line.trim();
-        if (cleanLine.length <= 5 && !/[。！？，“”‘’]/.test(cleanLine)) return false;
-        if (/月历|Welcome|来自各国|好友|书库|随苑|访客|留言\(\d*\)|上一篇|下一篇|返回顶部|分类|赞|Private|Link/gi.test(cleanLine)) return false;
-        return true;
-      }).join('\n');
-
-      const decoded = decodeHtmlEntities(html);
-
-      const converter = OpenCC.Converter({ from: 'tw', to: 'cn' });
-      const simplified = await converter(decoded);
-
-      const cleaned = simplified
-        .replace(/^\s*[\r\n]/gm, '') 
-        .replace(/\n{2,}/g, '\n')  
-        .trim();
-
-      const blob = new Blob([cleaned], { type: "text/plain;charset=utf-8" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "fc2_cleaned.txt";
-      a.click();
-    } catch (error) {
-      alert("出错：" + error.message);
-      console.error(error);
-    }
+async function downloadTxt() {
+  const url = document.getElementById("urlInput").value.trim();
+  if (!url) {
+    alert("Please enter a URL");
+    return;
   }
 
-  function decodeHtmlEntities(str) {
-    const textarea = document.createElement("textarea");
-    textarea.innerHTML = str;
-    return textarea.value;
-  }
+  const proxyUrl = `https://icy-dust-ce73.hengweilu0104.workers.dev/?url=${encodeURIComponent(url)}`;
 
-  window.downloadTxt = downloadTxt;
+  try {
+    const response = await fetch(proxyUrl);
+    let html = await response.text();
+
+    html = html.replace(/<script[\s\S]*?<\/script>/gi, '')
+               .replace(/<style[\s\S]*?<\/style>/gi, '')
+               .replace(/<\/?(br|p|div|li|ul|ol|h[1-6]|section|article)[^>]*>/gi, '\n')
+               .replace(/<\/?[^>]+>/g, '')
+               .replace(/\u00A0/g, ' ')
+               .replace(/function\s+[^(]*\([^)]*\)\s*{[\s\S]*?}/gi, '')
+               .replace(/var\s+\w+\s*=\s*[^;]+;/gi, '')
+               .replace(/window\.[^\n]+/gi, '')
+               .replace(/document\.[^\n]+/gi, '');
+
+    html = html.split('\n').filter(line => {
+      const cleanLine = line.trim();
+      if (cleanLine.length <= 5 && !/[。！？，“”‘’]/.test(cleanLine)) return false;
+      if (/Calendar|Welcome|Guest|Friend|Library|Private|Visitor|Comment\(\d*\)|Prev|Next|Top|Category|Like|Link/gi.test(cleanLine)) return false;
+      return true;
+    }).join('\n');
+
+    const decoded = decodeHtmlEntities(html);
+    const converter = OpenCC.Converter({ from: 'tw', to: 'cn' });
+    const simplified = await converter(decoded);
+
+    let cleaned = simplified.replace(/^\s*[\r\n]/gm, '').replace(/\n{2,}/g, '\n').trim();
+
+    const endIndex = cleaned.search(/全文完|全書完|全書已完|完结|完結|THE END|The End/i);
+    if (endIndex !== -1) cleaned = cleaned.substring(0, endIndex).trim();
+
+    const blob = new Blob([cleaned], { type: "text/plain;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "novel.txt";
+    a.click();
+  } catch (error) {
+    alert("Error: " + error.message);
+    console.error(error);
+  }
+}
+
+function decodeHtmlEntities(str) {
+  const textarea = document.createElement("textarea");
+  textarea.innerHTML = str;
+  return textarea.value;
+}
+
+window.downloadTxt = downloadTxt;
 </script>
 </body>
 </html>
