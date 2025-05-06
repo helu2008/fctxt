@@ -35,21 +35,39 @@ async function downloadTxt() {
                .replace(/window\.[^\n]+/gi, '')
                .replace(/document\.[^\n]+/gi, '');
 
-    html = html.split('\n').filter(line => {
-      const cleanLine = line.trim();
-      if (cleanLine.length <= 5 && !/[。！？，“”‘’]/.test(cleanLine)) return false;
-      if (/Calendar|Welcome|Guest|Friend|Library|Private|Visitor|Comment\(\d*\)|Prev|Next|Top|Category|Like|Link/gi.test(cleanLine)) return false;
-      return true;
-    }).join('\n');
+    const lines = html.split('\n');
+    let result = [];
+    let ended = false;
 
-    const decoded = decodeHtmlEntities(html);
+    for (let line of lines) {
+      let cleanLine = line.trim();
+
+      if (!ended) {
+        if (/全文完|全书完|全書完|完结|完結/i.test(cleanLine)) {
+          result.push(cleanLine);
+          ended = true;
+          continue;
+        }
+
+        if (cleanLine.length === 0) continue;
+        if (cleanLine.length <= 5 && !/[。！？，“”‘’]/.test(cleanLine)) continue;
+        if (/^\d+(\.\d+)?$/.test(cleanLine)) continue;
+        if (/^\d{4}[./]\d{1,2}[./]?\d{0,2}$/.test(cleanLine)) continue;
+        if (/^\d{1,2}:\d{2}$/.test(cleanLine)) continue;
+        if (cleanLine.split(/\s+/).length >= 5 && /^[\s\S]*\s{2,}[\s\S]*$/.test(cleanLine)) continue;
+        if (/Archives|Categories|Welcome|Guest|Friend|Library|Private|Visitor|Comment|Prev|Next|Top|Category|Like|Link/i.test(cleanLine)) continue;
+
+        result.push(cleanLine);
+      }
+    }
+
     const converter = OpenCC.Converter({ from: 'tw', to: 'cn' });
-    const simplified = await converter(decoded);
+    const simplified = await converter(result.join('\n'));
 
-    let cleaned = simplified.replace(/^\s*[\r\n]/gm, '').replace(/\n{2,}/g, '\n').trim();
-
-    const endIndex = cleaned.search(/全文完|全書完|全書已完|完结|完結|THE END|The End/i);
-    if (endIndex !== -1) cleaned = cleaned.substring(0, endIndex).trim();
+    const cleaned = simplified
+      .replace(/^\s*[\r\n]/gm, '')
+      .replace(/\n{2,}/g, '\n')
+      .trim();
 
     const blob = new Blob([cleaned], { type: "text/plain;charset=utf-8" });
     const a = document.createElement("a");
