@@ -5,9 +5,9 @@
   <title>FC2 to TXT</title>
 </head>
 <body>
-  <h2>📘 FC2 TO TXT</h2>
-  <input type="text" id="urlInput" placeholder="FC2 webpage" style="width: 400px;">
-  <button onclick="downloadTxt()">Download TXT</button>
+  <h2>📘 FC2 TO TXT (Ultimate Clean Version)</h2>
+  <input type="text" id="urlInput" placeholder="输入 FC2 网页地址" style="width: 400px;">
+  <button onclick="downloadTxt()">下载 TXT</button>
 
 <script type="module">
   import * as OpenCC from 'https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/esm/t2cn.js';
@@ -32,12 +32,19 @@
 
       html = html.replace(/<\/?[^>]+>/g, '');
 
-      html = html.replace(/返回顶部|下一页|上一篇|下一篇|分类：?.*|类别：?.*|留言\(\d*\)|^\d{1,2}时\d{1,2}分.*|赞/gi, '');
+      html = html.replace(/\u00A0/g, ' ');
 
       html = html.replace(/function\s+[^(]*\([^)]*\)\s*{[\s\S]*?}/gi, '')
                  .replace(/var\s+\w+\s*=\s*[^;]+;/gi, '')
                  .replace(/window\.[^\n]+/gi, '')
                  .replace(/document\.[^\n]+/gi, '');
+
+      html = html.split('\n').filter(line => {
+        const cleanLine = line.trim();
+        if (cleanLine.length <= 5 && !/[。！？，“”‘’]/.test(cleanLine)) return false;
+        if (/月历|Welcome|来自各国|好友|书库|随苑|访客|留言\(\d*\)|上一篇|下一篇|返回顶部|分类|赞|Private|Link/gi.test(cleanLine)) return false;
+        return true;
+      }).join('\n');
 
       const decoded = decodeHtmlEntities(html);
 
@@ -46,13 +53,13 @@
 
       const cleaned = simplified
         .replace(/^\s*[\r\n]/gm, '') 
-        .replace(/\n{2,}/g, '\n') 
+        .replace(/\n{2,}/g, '\n')  
         .trim();
 
       const blob = new Blob([cleaned], { type: "text/plain;charset=utf-8" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = "fc2_simplified.txt";
+      a.download = "fc2_cleaned.txt";
       a.click();
     } catch (error) {
       alert("出错：" + error.message);
