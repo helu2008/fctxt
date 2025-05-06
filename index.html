@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>fc2 to txt</title>
+  <title>FC2 to TXT</title>
 </head>
 <body>
   <h2>📘 FC2 TO TXT</h2>
@@ -15,7 +15,7 @@
   async function downloadTxt() {
     const url = document.getElementById("urlInput").value.trim();
     if (!url) {
-      alert("input FC2 webpage");
+      alert("请输入 FC2 页面网址");
       return;
     }
 
@@ -25,28 +25,37 @@
       const response = await fetch(proxyUrl);
       let html = await response.text();
 
-      // Replace block-level tags with newlines
-      html = html
-        .replace(/<\/?(br|p|div|li|ul|ol|h[1-6]|section|article)[^>]*>/gi, '\n')
-        .replace(/<\/?[^>]+>/g, '');
+      html = html.replace(/<script[\s\S]*?<\/script>/gi, '')
+                 .replace(/<style[\s\S]*?<\/style>/gi, '');
 
-      // Decode HTML entities
-      let decoded = decodeHtmlEntities(html);
+      html = html.replace(/<\/?(br|p|div|li|ul|ol|h[1-6]|section|article)[^>]*>/gi, '\n');
 
-      // Convert Traditional → Simplified
+      html = html.replace(/<\/?[^>]+>/g, '');
+
+      html = html.replace(/返回顶部|下一页|上一篇|下一篇|分类：?.*|类别：?.*|留言\(\d*\)|^\d{1,2}时\d{1,2}分.*|赞, '');
+
+      html = html.replace(/function\s+[^(]*\([^)]*\)\s*{[\s\S]*?}/gi, '')
+                 .replace(/var\s+\w+\s*=\s*[^;]+;/gi, '')
+                 .replace(/window\.[^\n]+/gi, '')
+                 .replace(/document\.[^\n]+/gi, '');
+
+      const decoded = decodeHtmlEntities(html);
+
       const converter = OpenCC.Converter({ from: 'tw', to: 'cn' });
       const simplified = await converter(decoded);
 
-      const cleaned = simplified.replace(/\n{2,}/g, '\n').trim();
+      const cleaned = simplified
+        .replace(/^\s*[\r\n]/gm, '') 
+        .replace(/\n{2,}/g, '\n') 
+        .trim();
 
-      // Download as txt
       const blob = new Blob([cleaned], { type: "text/plain;charset=utf-8" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
       a.download = "fc2_simplified.txt";
       a.click();
     } catch (error) {
-      alert("error：" + error.message);
+      alert("出错：" + error.message);
       console.error(error);
     }
   }
@@ -57,7 +66,6 @@
     return textarea.value;
   }
 
-  // Attach to global so the button still works
   window.downloadTxt = downloadTxt;
 </script>
 </body>
